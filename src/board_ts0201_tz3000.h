@@ -8,11 +8,13 @@
 
 #include "version_cfg.h"
 
-#if (BOARD == BOARD_TS0201_TZ3000)
+#if (BOARD == BOARD_TS0201_TZ3000 || BOARD == BOARD_TS0201_TZ3000_BGUSER20)
 
 #define ZIGBEE_TUYA_OTA 	1
 
 #define RF_TX_POWER_DEF		RF_POWER_INDEX_P3p01dBm
+
+#define TZ3000_BGUSER20 // variant with led & button pinout change.
 
 // TLSR825x 1M Flash
 // GPIO_PA7 - SWS, free, (debug TX)
@@ -24,11 +26,23 @@
 // GPIO_PD7 - ALERT (CHT8305)
 
 // BUTTON
+#ifndef TZ3000_BGUSER20
+
+#define BUTTON1             GPIO_PC0
+#define PC0_FUNC			AS_GPIO
+#define PC0_OUTPUT_ENABLE	0
+#define PC0_INPUT_ENABLE	1
+#define	PULL_WAKEUP_SRC_PC0	PM_PIN_PULLUP_10K
+	
+#else
+// BGUSER20 variant
 #define BUTTON1             GPIO_PB5
 #define PB5_FUNC			AS_GPIO
 #define PB5_OUTPUT_ENABLE	0
 #define PB5_INPUT_ENABLE	1
 #define	PULL_WAKEUP_SRC_PB5	PM_PIN_PULLUP_10K
+	
+#endif
 
 // I2C
 #define I2C_CLOCK	400000 // Hz
@@ -45,6 +59,18 @@
 #define	USE_DISPLAY			0
 
 // LED
+#ifndef TZ3000_BGUSER20
+
+#define LED_ON				1
+#define LED_OFF				0
+#define GPIO_LED			GPIO_PB4
+#define PB4_FUNC	  		AS_GPIO
+#define PB4_OUTPUT_ENABLE	1
+#define PB4_INPUT_ENABLE	1
+#define PB4_DATA_OUT		LED_OFF
+
+#else
+// BGUSER20 variant
 #define LED_ON				1
 #define LED_OFF				0
 #define GPIO_LED			GPIO_PD2
@@ -53,6 +79,7 @@
 #define PD2_INPUT_ENABLE	1
 #define PD2_DATA_OUT		LED_OFF
 
+#endif
 // VBAT
 #define SHL_ADC_VBAT		C5P // see in adc.h ADC_InputPchTypeDef
 #define GPIO_VBAT			GPIO_PC5 // missing pin on case TLSR825x
