@@ -40,13 +40,13 @@ GPIO_PD7 - ALERT (CHT8305)
 #define	USE_DISPLAY			0
 
 // BUTTON
-#define BUTTON1             GPIO_PC0
+#define BUTTON1             GPIO_PB5
+#define PB5_FUNC			AS_GPIO
 #define BUTTON1_ON			0
 #define BUTTON1_OFF			1
-#define PC0_FUNC			AS_GPIO
-#define PC0_OUTPUT_ENABLE	0
-#define PC0_INPUT_ENABLE	1
-#define	PULL_WAKEUP_SRC_PC0	PM_PIN_PULLUP_10K
+#define PB5_OUTPUT_ENABLE	0
+#define PB5_INPUT_ENABLE	1
+#define	PULL_WAKEUP_SRC_PB5	PM_PIN_PULLUP_10K
 
 // I2C Sensor
 #define	USE_I2C_DRV			I2C_DRV_HARD
@@ -68,11 +68,12 @@ GPIO_PD7 - ALERT (CHT8305)
 // LED
 #define LED_ON				1
 #define LED_OFF				0
-#define GPIO_LED			GPIO_PB4
-#define PB4_FUNC	  		AS_GPIO
-#define PB4_OUTPUT_ENABLE	1
-#define PB4_INPUT_ENABLE	1
-#define PB4_DATA_OUT		LED_OFF
+#define GPIO_LED			GPIO_PD2
+#define PD2_FUNC	  		AS_GPIO
+#define PD2_OUTPUT_ENABLE	1
+#define PD2_INPUT_ENABLE	1
+#define PD2_DATA_OUT		LED_OFF
+
 
 // VBAT
 #define SHL_ADC_VBAT		C5P // see in adc.h ADC_InputPchTypeDef
