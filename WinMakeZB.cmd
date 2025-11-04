@@ -1,7 +1,8 @@
 @set TLPATH=D:\MCU\TelinkIoTStudio
 @set PATH=%TLPATH%\bin;%TLPATH%\opt\tc32\bin;%TLPATH%\mingw\bin;%TLPATH%\opt\tc32\tc32-elf\bin;%PATH%
-@set SWVER=_zb0005
-@del /Q .\bin
+@set SWVER=_zb0008
+@del /Q .\bin\*.bin
+@del /Q .\bin\*.zigbee
 @del /Q .\build
 make -s -j clean USE_ZB=1
 make -s -j VERSION_BIN=%SWVER% PROJECT_NAME=ZMHOC401 USE_ZB=1 POJECT_DEF="-DBOARD=BOARD_MHO_C401"
@@ -57,6 +58,9 @@ make -s -j VERSION_BIN=%SWVER% PROJECT_NAME=ZYZTH01 USE_ZB=1 POJECT_DEF="-DBOARD
 make -s -j clean USE_ZB=1
 make -s -j VERSION_BIN=%SWVER% PROJECT_NAME=ZG227Z USE_ZB=1 POJECT_DEF="-DBOARD=BOARD_ZG_227Z"
 @if not exist "bin\ZG227Z%SWVER%.bin" goto :error
+make -s -j clean USE_ZB=1
+make -s -j VERSION_BIN=%SWVER% PROJECT_NAME=ZG303Z USE_ZB=1 POJECT_DEF="-DBOARD=BOARD_ZG303Z"
+@if not exist "bin\ZG303Z%SWVER%.bin" goto :error
 @exit
 :error
 echo "Error!"

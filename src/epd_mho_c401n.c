@@ -12,6 +12,8 @@
 #define LOW     0
 #define HIGH    1
 
+#define 	DEF_EPD_REFRESH_CNT	1024
+
 RAM scr_data_t scr;
 
 const u8 T_LUT_ping[5] = {0x07B, 0x081, 0x0E4, 0x0E7, 0x008};
@@ -145,51 +147,36 @@ void show_temp_symbol(u8 symbol) {
 	else
 		scr.display_buff[14] &= ~BIT(0); // "_"
 }
-/* 0 = "   " off,
- * 1 = " o "
- * 2 = "o^o"
- * 3 = "o-o"
- * 4 = "oVo"
- * 5 = "vVv" happy
- * 6 = "^-^" sad
- * 7 = "oOo" */
+
+/* 0 = "     " off,
+ * 1 = " uuu "
+ * 2 = " ^^^ "
+ * 3 = " o-o "
+ * 4 = "(   )"
+ * 5 = "(uuu)" happy
+ * 6 = "(^^^)" sad
+ * 7 = "(o_o)" */
 _SCR_CODE_SEC_
 void show_smiley(u8 state){
- 	// off
+ 	// all off
 	scr.display_buff[5] &= ~(BIT(2) | BIT(4) | BIT(6)); // do not reset %
 	scr.display_buff[6] = 0;
-	scr.display_buff[7] &= ~(BIT(4));
-	if (state) {
-		scr.display_buff[7] |= BIT(0); /* (  ) */
+	scr.display_buff[7] &= ~(BIT(0) | BIT(2));
+
+	if(state & 4) {
+		scr.display_buff[7] |= BIT(0);
 	}
-	switch(state & 7) {
-		case 1:
-			scr.display_buff[5] |= BIT(4);
-			scr.display_buff[6] |= BIT(0);
+	switch(state & 3) {
+		case 1: // "uuu"
+			scr.display_buff[5] |= BIT(4); // " u " happy
+			scr.display_buff[6] |= BIT(4); // "u u"
 			break;
-		case 2:
-			scr.display_buff[5] |= BIT(6);
-			scr.display_buff[6] |= BIT(4) | BIT(6);
+		case 2: // "^^^" sad
+			scr.display_buff[6] |= BIT(0) | BIT(6); // "^ ^"
 			break;
-		case 3:
-			scr.display_buff[6] |= BIT(0) | BIT(4) | BIT(6);
-			scr.display_buff[7] |= BIT(2);
-			break;
-		case 4:
-			scr.display_buff[5] |= BIT(2);
-			scr.display_buff[6] |= BIT(0) | BIT(2) | BIT(4) | BIT(6);
-			scr.display_buff[7] |= BIT(2);
-			break;
-		case 5:
-			scr.display_buff[5] |= BIT(4) | BIT(6);
-			scr.display_buff[6] |= BIT(4) | BIT(6);
-			break;
-		case 6:
-			scr.display_buff[6] |= BIT(0) | BIT(4) | BIT(6);
-			break;
-		case 7:
-			scr.display_buff[5] |= BIT(4);
-			scr.display_buff[6] |= BIT(0) | BIT(4) | BIT(6);
+		case 3: // "o-o"
+			scr.display_buff[5] |= BIT(6); // " _ "
+			scr.display_buff[6] |= BIT(4) | BIT(6); // "o o"
 			break;
 	}
 }
@@ -267,6 +254,7 @@ void show_big_number_x10(s16 number, u8 symbol){
 	if (symbol & 0x80)
 		scr.display_buff[14] |= BIT(0); // "_"
 
+	scr.display_buff[7] &= ~BIT(4); // "1"
 	scr.display_buff[8] = 0;
 	scr.display_buff[9] = 0;
 	scr.display_buff[10] = 0;
@@ -344,8 +332,11 @@ void init_lcd(void) {
 	scr.display_off = g_zcl_thermostatUICfgAttrs.display_off;
     scr.stage = 1; // Update/Init, stage 1
     scr.updated = 0;
-	memset(scr.display_buff, 0, sizeof(scr.display_buff));
-	memset(scr.display_cmp_buff, 0, sizeof(scr.display_cmp_buff));
+#ifdef 	DEF_EPD_REFRESH_CNT
+    scr.refresh_cnt = DEF_EPD_REFRESH_CNT; // 1024
+#endif
+    //memset(scr.display_buff, 0, sizeof(scr.display_buff));
+    memset(scr.display_cmp_buff, 0, sizeof(scr.display_cmp_buff));
     gpio_write(EPD_RST, HIGH);
 	//scr.display_buff[15] = 0;
 #if PM_ENABLE
@@ -381,6 +372,7 @@ __attribute__((optimize("-Os"))) int task_lcd(void) {
 				scr.stage = 4;
 				// EPD_BUSY: ~500 ms
 			} else {
+				//memcpy(scr.display_cmp_buff, scr.display_buff, sizeof(scr.display_cmp_buff));
 				scr.updated = 1;
 				scr.stage = 2;
 				// EPD_BUSY: ~1000 ms
@@ -391,12 +383,22 @@ __attribute__((optimize("-Os"))) int task_lcd(void) {
 			transmit(0, 0x0AE);
 			transmit(0, 0x028);
 			transmit(0, 0x0AD);
-			scr.init = 1;
 		default:
 			if((!scr.display_off) // g_zcl_thermostatUICfgAttrs.display_off
 			&& memcmp(scr.display_cmp_buff, scr.display_buff, sizeof(scr.display_buff))) {
 				memcpy(scr.display_cmp_buff, scr.display_buff, sizeof(scr.display_cmp_buff));
 				scr.stage = 1;
+#ifdef 	DEF_EPD_REFRESH_CNT
+				if (scr.refresh_cnt) {
+					scr.refresh_cnt--;
+				} else {
+				    gpio_write(EPD_RST, LOW);
+				    sleep_us(50);
+				    scr.refresh_cnt = DEF_EPD_REFRESH_CNT; // 1024
+				    scr.updated = 0;
+				    gpio_write(EPD_RST, HIGH);
+				}
+#endif
 			} else
 				scr.stage = 0;
 		}

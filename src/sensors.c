@@ -11,6 +11,10 @@
 #ifndef USE_I2C_DRV
 #error "Define USE_I2C_DRV!"
 #endif
+#if (DEV_SERVICES & SERVICE_PLM)
+#include "rh.h"
+#endif
+
 
 sensor_th_t sensor_ht;
 
@@ -535,6 +539,7 @@ int read_sensor_sht30_shtc3_sht4x(void *cfg) {
 		if (reg_i2c_status & FLD_I2C_NAK) {
 			reg_i2c_ctrl = FLD_I2C_CMD_STOP;
 			while (reg_i2c_status & FLD_I2C_CMD_BUSY);
+			irq_restore(r);
 		} else { // ACK ok
 			reg_i2c_ctrl = FLD_I2C_CMD_DI | FLD_I2C_CMD_READ_ID;
 			while (reg_i2c_status & FLD_I2C_CMD_BUSY);
@@ -777,6 +782,9 @@ int read_sensor(void) {
 		}
 	} else
 		battery_detect(0);
+#if (DEV_SERVICES & SERVICE_PLM)
+	read_rh_sensor();
+#endif
 	if(re) {
 		check_sensor();
 	}
@@ -796,6 +804,9 @@ void init_sensor(void) {
 			}
 		}
 	}
+#if (DEV_SERVICES & SERVICE_PLM)
+	init_rh_sensor();
+#endif
 }
 
 #endif // SENSOR_TH

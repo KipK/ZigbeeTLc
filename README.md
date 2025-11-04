@@ -19,7 +19,9 @@ Currently supported devices:
  [LKTMZL02](https://pvvx.github.io/LKTMZL02),
  [ZG-227Z](https://pvvx.github.io/ZG-227Z),
  [ZY-ZTH02](https://pvvx.github.io/ZY-ZTH02),
- [ZY-ZTH02Pro](https://pvvx.github.io/ZY-ZTH02Pro).
+ [ZY-ZTH02Pro](https://pvvx.github.io/ZY-ZTH02Pro),
+ [ZY-ZTH03Pro](https://pvvx.github.io/TS0201_TZ3000_v1w2k9dd),
+ [ZG-303Z](https://pvvx.github.io/ZG-303Z).
 
 * Work with modification:
  [ZTH01](https://pvvx.github.io/TS0601_TZE200_zth01/),
@@ -31,6 +33,8 @@ Additional alternative firmware options for some devices with TLSR825x can be fo
 Please direct questions regarding use and configuration in [ZHA](https://www.home-assistant.io/integrations/zha/), [Zigbee2MQTT](https://www.zigbee2mqtt.io/), [Home Assistant](https://www.home-assistant.io/) to the appropriate resources.
 
 ### Warning(!): Firmware version 0.1.2.6 is built on a new version of SDK from Telink. Requires reset of all previous settings and new binding. Old values from previous versions remembered by the device are incompatible.
+
+* For new LYWSD03MMC variants released since 03.2025 there is no Zigbee firmware (not supported yet).
 
 New versions check that the configuration written to the device is compatible with the one updated for the new SDK (i.e. compatible with version 0.1.2.5). If it is not compatible, all settings, including bindings, are deleted. In this case, the Zigbee coordinator sees a device with the same IEEE number and a "rebinding" is performed.
 
@@ -99,29 +103,29 @@ Sample: "1141-020a-01233001-Z03MMC.zigbee"
 | 1141 | 020a | 0123 | 3001 | Z03MMC | zigbee |
 | 0x1141 - Telink | 0x02 - TLSR825x, 0x0a - Xiaomi LYWSD03MMC | App release 0.1, App build 2.3 | Zigbee v3.0, Release 0.1 |  Z03MMC | OTA |
 
-|Image Type| Device, note |
-| -- | -- |
-| 0x0201 | MHO-C401 (old version) |
-| 0x0202 | CGG1 (old version) |
-| 0x0203 | LYWSD03MMC ver https://github.com/devbis/z03mmc |
-| 0x0204 | WATERMETER ver https://github.com/slacky1965/watermeter_zed |
-| 0x0206 | CGDK2 |
-| 0x0207 | CGG1 (new version) |
-| 0x0208 | MHO-C401 (new version) |
-| 0x0209 | MJWSD05MMC |
-| 0x020A | LYWSD03MMC ver https://github.com/pvvx/ZigbeeTLc |
-| 0x020B | MHO-C122 |
-| 0x020D | MJWSD06MMC |
-| 0x0211 | TS0201-TZ3000 |
-| 0x0216 | TH03Z |
-| 0x021b | ZTH01 |
-| 0x021c | ZTH02 |
-| 0x021e | TH03 |
-| 0x021f | LKTMZL02 |
-| 0x0221 | ZTH05 |
-| 0x0225 | ZY-ZTH02 |
-| 0x0226 | ZY-ZTH01 |
-| 0x0227 | ZG227 |
+|Image Type| File Name | Device, note |
+| -- | -- | -- |
+| 0x0201 | ZMHOC401 | MHO-C401 (old version) |
+| 0x0202 | ZCGG1 | CGG1 (old version) |
+| 0x0203 | Z03MMC | LYWSD03MMC ver https://github.com/devbis/z03mmc |
+| 0x0204 | --- | WATERMETER ver https://github.com/slacky1965/watermeter_zed |
+| 0x0206 | ZCGDK2 | CGDK2 |
+| 0x0207 | ZCGG1N | CGG1 (new version) |
+| 0x0208 | ZMHOC401N | MHO-C401 (new version) |
+| 0x020A | Z03MMC | LYWSD03MMC ver https://github.com/pvvx/ZigbeeTLc |
+| 0x020B | ZMHOC122 | MHO-C122 |
+| 0x020D | Z06MMC | MJWSD06MMC |
+| 0x0211 | ZTS0201 | TS0201-TZ3000 |
+| 0x0216 | ZTH03 | TH03Z |
+| 0x021b | ZTH01 | ZTH01 |
+| 0x021c | ZTH02 | ZTH02 |
+| 0x021e | TH03 | TH03 |
+| 0x021f | LKTMZL02 | LKTMZL02 |
+| 0x0221 | ZTH05 | ZTH05 |
+| 0x0225 | ZYZTH02 | ZY-ZTH02 |
+| 0x0226 | ZYZTH01 | ZY-ZTH02-Pro, ZY-ZTH03-Pro |
+| 0x0227 | ZG227 | ZG227 |
+| 0x022C | ZG303Z | ZG-303Z |
 
 * To restore to BLE, use the Zigbee OTA file with the same number device from: https://github.com/pvvx/ATC_MiThermometer/tree/master/zigbee_ota
 
@@ -205,6 +209,12 @@ The flashing "BT" icon is called by the "identify" command.
 25. Ver 0.1.2.5. Completely reworked version on SDK v3.7.1.2. Merging with [ZBdevice](https://github.com/pvvx/ZigbeeTLc/blob/master/ZBdevices.md). Reduced battery consumption for thermometers with SHTC3 sensor. Changes to storage area for user settings. Additions to button functions. Multiple fixes. Adding new devices. ...
 
 26. Ver 0.1.2.6. Fix - In some cases the 2 timers did not turn off, which led to increased battery consumption. Changes in PollControl. Added [MJWSD06MMC](https://pvvx.github.io/MJWSD06MMC).
+
+27. Ver 0.1.2.7. Fix "1" MHO-C401N, added irq_restore() in sensors SHT4X/SHTC3/SHT30/CHT832x. Limitation "Measurement interval" from 3 to 30 seconds. 
+
+28. Ver 0.1.2.8. Changed LongPollControl (ZHA) setting control algorithm and measurement interval (limit 3..30 seconds). For MHO-C401N added E-Ink refresh after 1024 display updates.
+
+29. Ver 0.1.2.9. Added new version LYWSD03MMC HW:B1.6 (custom name B1.1). Added ZG-303Z.
 
 ## Make
 
